@@ -9,7 +9,9 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     setField(state, action) {
-      state[action.payload.field] = action.payload.value;
+      let newState = { ...state };
+      newState[action.payload.field] = action.payload.value;
+      return newState;
     },
   },
 });

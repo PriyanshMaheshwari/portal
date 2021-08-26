@@ -4,6 +4,7 @@ export const notificationSchema = {
     trim: true,
     required: true,
     maxlength: 32,
+    minlength: 3
   },
   summary: {
     type: String,

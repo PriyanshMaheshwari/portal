@@ -1,47 +1,47 @@
 import "../styles/App.css";
-import { useSelector, useDispatch } from "react-redux";
-import { notificationActions } from "../store/notificationslice";
 import { Button } from "@material-ui/core/";
-import { notificationSchema } from "../constants/schemas";
 import React, { useState } from "react";
 import { InputComponent } from "./InputComponent";
+import {isCorrect} from "../util/formHelpers"
 
-function App() {
-  const dispatch = useDispatch();
-  const notificationDetails = useSelector((state) => state.notification);
+function FormComponent(props) {
   const [focus, setFocus] = useState("title");
   const [zeroSubmission, setZeroSubmission] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  const isCorrect = () => {
-    for(const field in notificationSchema){
-      if(notificationSchema[field].required && notificationDetails[field]==="") return false;
-    }
-
-    return true;
-  }
-
   const verify = (formFields) => {
     let f = true;
-    for (let i = 0;i<formFields.length;i++) {
-      if (formFields[i].required && notificationDetails[formFields[i].name]==="") {
+    for (let i = 0; i < formFields.length; i++) {
+      if (
+        formFields[i].required &&
+        props.fieldDetails[formFields[i].name] === ""
+      ) {
         formFields[i].error = true;
         formFields[i].formHelperText = "The given field is required.";
-      } 
-      else if (formFields[i].type === String) {
-        if (formFields[i].minlength > notificationDetails[formFields[i].name].length) {
+      } else if (formFields[i].type === String) {
+        if (
+          formFields[i].minlength >
+          props.fieldDetails[formFields[i].name].length
+        ) {
           formFields[i].error = true;
-          formFields[i].formHelperText = `The ${formFields[i].name} should be of atleast ${formFields[i].minlength} length`;
+          formFields[
+            i
+          ].formHelperText = `The ${formFields[i].name} should be of atleast ${formFields[i].minlength} length`;
         }
-        if (formFields[i].maxlength < notificationDetails[formFields[i].name].length) {
+        if (
+          formFields[i].maxlength <
+          props.fieldDetails[formFields[i].name].length
+        ) {
           formFields[i].error = true;
-          formFields[i].formHelperText = `The ${formFields[i].name} should not exceed length of ${formFields[i].minlength}`;
+          formFields[
+            i
+          ].formHelperText = `The ${formFields[i].name} should not exceed length of ${formFields[i].minlength}`;
         }
       }
 
       if (formFields[i].error) {
         if (f) {
-          if(submitted){
+          if (submitted) {
             setFocus(formFields[i].name);
             setSubmitted(false);
           }
@@ -54,8 +54,8 @@ function App() {
 
   const getFormFields = () => {
     let formFields = [];
-    for (const field in notificationSchema) {
-      const extendedField = { ...notificationSchema[field] };
+    for (const field in props.schema) {
+      const extendedField = { ...props.schema[field] };
       extendedField.error = false;
       extendedField.formHelperText = "";
       extendedField.name = field;
@@ -67,7 +67,7 @@ function App() {
     }
     if (!zeroSubmission) verify(formFields);
     return formFields;
-  }
+  };
 
   const styles = {
     margin: "10px",
@@ -77,14 +77,14 @@ function App() {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (isCorrect()) {
+    if (isCorrect(props.schema, props.fieldDetails)) {
       const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notificationDetails),
+        body: JSON.stringify(props.fieldDetails),
       };
       const response = await fetch(
-        "http://localhost:8000/api/notification/add",
+        props.api,
         requestOptions
       );
       const data = await response.json();
@@ -99,15 +99,10 @@ function App() {
   const onChangeHandler = (object, type) => {
     let value = object.target.value;
     if (type === Boolean) value = object.target.checked;
-    dispatch(
-      notificationActions.setField({
-        field: object.target.id,
-        value,
-      })
-    );
+    props.setValue(object.target.id,value);
     setFocus(object.target.id);
   };
-  
+
   return (
     <React.Fragment>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
@@ -117,7 +112,7 @@ function App() {
               <InputComponent
                 fieldData={fieldData}
                 onChangeHandler={onChangeHandler}
-                notificationDetails={notificationDetails}
+                notificationDetails={props.fieldDetails}
               />
             </div>
           );
@@ -132,4 +127,4 @@ function App() {
   );
 }
 
-export default App;
+export default FormComponent;

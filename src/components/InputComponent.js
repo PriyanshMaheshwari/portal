@@ -5,7 +5,12 @@ import {
   FormHelperText,
   FormControlLabel,
   Checkbox,
+  TextField,
 } from "@material-ui/core/";
+
+import DateFnsUtils from "@date-io/date-fns";
+
+import { DatePicker, LocalizationProvider } from "@material-ui/lab";
 
 export const InputComponent = (props) => {
   switch (props.fieldData.type) {
@@ -16,13 +21,34 @@ export const InputComponent = (props) => {
             control={
               <Checkbox
                 checked={props.notificationDetails[props.fieldData.name]}
-                onChange={(obj) => props.onChangeHandler(obj,props.fieldData.type)}
+                onChange={(obj) =>
+                  props.onChangeHandler(obj, props.fieldData.type)
+                }
                 id={props.fieldData.name}
               />
             }
             label={props.fieldData.name}
           />
         </FormControl>
+      );
+
+    case Date:
+      return (
+        <LocalizationProvider dateAdapter={DateFnsUtils}>
+          <DatePicker
+            label={props.fieldData.name}
+            value={props.notificationDetails[props.fieldData.name]}
+            onChange={(date) =>
+              props.onChangeHandler(
+                props.fieldData.name,
+                props.fieldData.type,
+                date
+              )
+            }
+            autoFocus={props.fieldData.autoFocus}
+            renderInput={(params) => <TextField {...params} autoFocus={props.fieldData.autoFocus}/>}
+          />
+        </LocalizationProvider>
       );
 
     default:
@@ -36,7 +62,7 @@ export const InputComponent = (props) => {
             aria-describedby="my-helper-text"
             error={props.fieldData.error}
             value={props.notificationDetails[props.fieldData.name]}
-            onChange={(obj) => props.onChangeHandler(obj,props.fieldData.type)}
+            onChange={(obj) => props.onChangeHandler(obj, props.fieldData.type)}
             autoFocus={props.fieldData.autoFocus}
           />
           {props.fieldData.formHelperText !== "" && (

@@ -5,7 +5,7 @@ import { InputComponent } from "./InputComponent";
 import {isCorrect} from "../util/formHelpers"
 
 function FormComponent(props) {
-  const [focus, setFocus] = useState("title");
+  const [focus, setFocus] = useState("");
   const [zeroSubmission, setZeroSubmission] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
@@ -96,9 +96,16 @@ function FormComponent(props) {
     }
   };
 
-  const onChangeHandler = (object, type) => {
+  const onChangeHandler = (object, type, date = null) => {
+    if(type === Date){
+      props.setValue(object, date);
+      setFocus(object);
+      return;
+    }
+
     let value = object.target.value;
     if (type === Boolean) value = object.target.checked;
+
     props.setValue(object.target.id,value);
     setFocus(object.target.id);
   };
